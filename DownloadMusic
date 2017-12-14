@@ -1,0 +1,45 @@
+import os
+import urllib
+import requests
+
+link = "http://music.163.com/api/playlist/detail?id="
+linkIds = {"1": "2884035", "2": "19723756", "3": "3778678"}
+linkTypes = {1: "网易原创歌曲榜", 2: "网易云音乐飙升榜", 3: "网易云音乐热歌榜"}
+
+print("******下载网易音乐******")
+for i in range(len(linkTypes)):
+    print(str(i+1) + " " + linkTypes[i+1])
+print()
+    
+while True:
+    inputId = input("请选择下载的榜单：").strip()
+    if inputId.isdigit():
+        if int(inputId) >= 1 and int(inputId) <= len(linkIds):
+            linkId = linkIds[inputId]
+            break
+
+downloadPath = "./download/" + linkTypes[int(inputId)]
+if os.path.isdir(downloadPath) == False:
+    os.makedirs(downloadPath)
+    
+r = requests.get(link + linkId)
+arr = r.json()["result"]["tracks"]
+maxCount = len(arr)
+
+while True:
+    inputCount = input("请输入下载的数量(不超过"+str(maxCount)+")：").strip()
+    if inputCount.isdigit():
+        inputCount = int(inputCount)
+        if inputCount >= 1 and inputCount <= maxCount:
+            break
+
+print()
+print("******下载进度******")
+for i in range(inputCount):
+    name = str(i+1) + " " + arr[i]["name"] + ".mp3"
+    url = "http://music.163.com/song/media/outer/url?id=" + str(arr[i]["id"]) + ".mp3"
+    urllib.request.urlretrieve(url, downloadPath + "/"+name)
+    print(name + " 下载完成")
+
+print()
+input("按回车键退出。。。")
